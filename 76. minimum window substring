@@ -1,0 +1,80 @@
+class Solution {
+public:
+    map<char, int> sMap, tMap;  
+    int l=0, r=0, ans =INT_MAX, turn = 1, ansl = 0, ansR = 0;
+    
+    bool checkStatus(set<char> &t) {
+        bool status = true;
+        
+        for(auto it=t.begin();it!=t.end();it++) {
+            if(sMap[*it] < tMap[*it]) {
+                status = false;
+            }
+        }
+        return status;
+    }
+    
+    string buildOutput(string &s) {
+        stringstream ss;
+        string strAns;
+        for(int i=ansl;i<ansR;i++) {
+            ss<<s[i];
+        }
+        ss>>strAns;
+        return strAns;
+    }
+    
+    void updateAns() {
+        if(ans > r-l) {
+            ansl = l;
+            ansR = r;   
+            ans = min(ans, ansR - ansl);
+        }
+    }
+    
+    string minWindow(string s, string t) {
+        //create frequencies.
+        set<char> st;
+        for(int i=0;i<t.length();i++) {
+            tMap[t[i]]++;
+            st.insert(t[i]);
+        }       
+        
+        
+        
+        while(true) {
+            if(r<(int)s.length() && turn!=0) {
+                if(tMap[s[r]] > 0) { 
+                    sMap[s[r]]++;
+                } 
+                r++;
+                if(checkStatus(st)) {
+                    updateAns();
+                    turn=0;
+                }
+            } else {
+                if(l< s.length()) {
+                    //try to decrease freq of l
+                    sMap[s[l]]--;
+                    if(!checkStatus(st)) {
+                        // if status is not ok, then proceed with further addition to right.
+                        sMap[s[l]]++;
+                        if(r < s.length()) {
+                            turn = 1;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        // otherwise delete current char (from left) & proceed.
+                        l++;
+                        updateAns();
+                    }
+                } else {
+                    // when we can't delete anymore, then break loop.
+                    break;
+                }
+            }
+        }
+        return buildOutput(s);
+    }
+};
